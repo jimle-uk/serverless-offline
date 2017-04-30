@@ -72,6 +72,9 @@ class Offline {
             usage: 'The region used to populate your templates.',
             shortcut: 'r',
           },
+          profile: {
+            usage: 'Used to set or override profile credentials in your environment variables.',
+          },
           skipCacheInvalidation: {
             usage: 'Tells the plugin to skip require cache invalidation. A script reloading tool like Nodemon might then be needed',
             shortcut: 'c',
@@ -186,6 +189,7 @@ class Offline {
     // Methods
     this._setOptions();     // Will create meaningful options from cli options
     this._setEnvironment(); // will set environment variables from serverless.yml file
+    this._setProfile();     // will set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY using given profile from serverless.yml
     this._registerBabel();  // Support for ES6
     this._createServer();   // Hapijs boot
     this._createRoutes();   // API  Gateway emulation
@@ -206,6 +210,20 @@ class Offline {
     });
   }
 
+  _setProfile() {
+    if (!this.options.profile) return;
+
+    ['aws_access_key_id', 'aws_secret_access_key'].forEach(key => {
+      exec(`aws configure get ${key} --profile ${this.options.profile}`, (error, stdout) => {
+        if (error) {
+          this.serverlessLog(`Offline error executing script [${error}]`);
+          process.exit(1);
+        }
+        process.env[key.toUpperCase()] = stdout.trim();
+      });
+    });
+  }
+
   _setOptions() {
     // Merge the different sources of values for this.options
     // Precedence is: command line options, YAML options, defaults.
@@ -217,6 +235,7 @@ class Offline {
       prefix: '/',
       stage: this.service.provider.stage,
       region: this.service.provider.region,
+      profile: this.service.provider.profile,
       noTimeout: false,
       noEnvironment: false,
       dontPrintOutput: false,

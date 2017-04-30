@@ -70,6 +70,7 @@ All CLI options are optional:
 --port                  -P  Port to listen on. Default: 3000
 --stage                 -s  The stage used to populate your templates. Default: the first stage found in your project.
 --region                -r  The region used to populate your templates. Default: the first region for the first stage found.
+--profile                   Used to set or override profile credentials in your environment variables. Default: provider profile if found.
 --noTimeout             -t  Disables the timeout feature.
 --noEnvironment             Turns of loading of your environment variables from serverless.yml. Allows the usage of tools such as PM2 or docker-compose.
 --dontPrintOutput           Turns of logging of your lambda outputs in the terminal.
